@@ -15,13 +15,14 @@ class Box:
     hight = 2
     depth = 1
 
+
     def __init__(self, color="default_color"):
         self.base = Box.box_count * (self.width + self.offset) + self.start
         self.color = color
         self.position = Box.box_count
         Box.box_count += 1
-
         self.formate()
+
 
     def formate(self):
 
@@ -36,15 +37,8 @@ class Box:
                 "ruf" : [self.base + 1, self.hight, 1]
                 }
 
-        #self.lines = [[a,b] for _, a in self.c.items() for _, b in self.c.items() if not a == b]
-        #self.lines = [x for x in self.lines if int(bool(x[0][0]) ^ bool(x[1][0])) + int(bool(x[0][1]) ^ bool(x[1][1])) + int(bool(x[0][2]) ^ bool(x[1][2])) == 1 ]
-        #for c, line in enumerate(self.lines):
-        #    if [line[1], line[0]] in self.lines:
-        #        del self.lines[c]
-
 
         ## [ l r ][ d u ][ b f ]
-
         self.lines = [
                [self.c["ldb"],self.c["ldf"]],
                [self.c["ldb"],self.c["lub"]],
@@ -64,31 +58,60 @@ class Box:
                [self.c["ruf"],self.c["luf"]],
                 ]
 
-    def resize(self, f_hight=1.0, f_width=1.0, f_depth=1.0):
-        
-        #print("old self.hight:", self.hight)
-        #print("old self.width:", self.width)
-        #print("old self.depth:", self.depth)
 
+    def resize(self, f_hight=1.0, f_width=1.0, f_depth=1.0):
         self.hight *= f_hight
         self.width *= f_width
         self.depth *= f_depth
-        
-        #print("new self.hight:", self.hight)
-        #print("new self.width:", self.width)
-        #print("old self.depth:", self.depth)
-       
         self.formate()
 
 
     def __del__(self):
         Box.box_count -= 1
 
+
     def info(self):
         print("offset:%s, color:%s" % (self.base, self.color))
         print("box %d from %d boxes" % (self.position, Box.box_count))
         print("self.c:", self.c)
         print("lines: ",self.lines)
+
+
+class Pyramide:
+    ## a pyramind this time working with poligones
+    hight_len = 3
+    side_len = 2
+    count = 0
+    offset = -3
+    distance = 1
+
+    def __init__(self):
+        Pyramide.count += 1
+        self.formate()
+        this.base_x = Pyramide.count * (side_len + distance)
+
+    def __del__(delf):
+        Pyramide.count -= 1
+
+
+    def format(self):
+        this.right = this.base_x + this.side_len
+        this.left = this.base_x
+        this.back = side_len
+        this.front = 0
+        c={
+                "top":[this.left + this.side_len / 2, hight_len / 2],
+                "lf" :[this.left,  this.front],
+                "lb" :[this.left,  this.back],
+                "rf" :[this.right, this.front],
+                "rb" :[this.right, this.back],
+                }
+
+        return c
+
+    def polygons(self):
+        return [[c["top"],c[e]] for k, v in c.items() if not k == "top"]
+
 
 
 if __name__ == "__main__":
