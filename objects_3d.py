@@ -135,7 +135,7 @@ class Pyramid:
 
 
 
-class Obj_loader:
+class Obj_loade:
     ### load and parse obj waveform file
 
     ### only the below data entries are implemented, there are some more, also see mtl files
@@ -159,18 +159,68 @@ class Obj_loader:
     # Polygonal face element (exp.: f 1 2 3    or  f 3/1 4/2 5/3)
     POLYGONAL_FACE_ELEMENT = "f"
 
+    # Named objects and polygon groups are specified via "o" and "g"
+    NAMED_OBJECTS = "o"
+    POLIGON_GROUPS = "g"
+
+
+    def parse_line(self, value):
+        ### at this point we can savely make some asumtions about the line passed
+        ### it is not a comment
+        ### it is a known type of entry
+        ### split() also ridded all double whitspaces and so on
+
+        if value[0] == self.GEOMETRIC_VERTICES:
+            if len(value) == 4:
+                value.append(1.0)
+            if len(value) == 5:
+                self.entrys[self.GEOMETRIC_VERTICES].append([float(v) for v in value[1:]])
+
+        elif value[0] == self.TEXTURE_CORDIANTES:
+            if len(value) == 3:
+                value.append(0.0) 
+            if len(value) == 4:
+                self.entrys[self.TEXTURE_CORDIANTES].append([float(v) for v in value[1:]])
+                for parameter in self.entrys[self.TEXTURE_CORDIANTES][-1]:
+                    if 0 <= parameter <= 1:
+                        raise RuntimeError("bad value in line" + str(value))
+
+        ### this is bejond incompleet! references are not seen as such
+        elif value[0] == self.POLYGONAL_FACE_ELEMENT:
+            if 1 > len(value) > 5:
+                tmp = []
+                for v in value[1:]:
+                    if "/" in v:
+                        raise RuntimeError("/// not inplemented yet")
+                    if "." in v:
+                        raise RuntimeError("Float not allowed i POLYGONAL_FACE_ELEMENT, found '.' character.")
+
+                    tmp.append(int(v))
+                self.entrys[POLYGONAL_FACE_ELEMENT].append(tmp)
+
+        elif value[0] == self.NAMED_OBJECTS: 
+            pass
+        elif value[0] == self.POLIGON_GROUPS:
+            pass
+
+        else:
+            raise RuntimeError("Unhandled type TBD!")
+
+
 
     def __init__(self, file_name, ignore_unknown_types=False):
+
+        ### dict of lists of entrys holding values from obj waveform filefile 
         self.entrys = {
-                GEOMETRIC_VERTICES:     [],
-                TEXTURE_CORDIANTES:     [],
-                VERTEX_NORMALS:         [],
-                PARAMETER_VERTICES:     [],
-                POLYGONAL_FACE_ELEMENT: []
+                self.NAMED_OBJECTS:         [],
+                self.GEOMETRIC_VERTICES:    [],
+                self.TEXTURE_CORDIANTES:    [],
+                self.VERTEX_NORMALS:        [],
+                self.PARAMETER_VERTICES:    [],
+                self.POLYGONAL_FACE_ELEMENT:[]
             }
 
 
-                }  ### dict of lists of entrys in obj waveform filefile 
         try:
             print("trying to load{0}".format(file_name))
             with open(file_name) as fd:
@@ -180,61 +230,29 @@ class Obj_loader:
                     if len(line) == 1:
                         ### ignore empty lines..
                         continue
-                    if line.strip()[0] == COMMENT:
+                    if line.strip()[0] == self.COMMENT:
                         ### ..and  comments 
                         continue
 
                     value = line.split()
                     if value[0] in self.entrys.keys():
                         ### known entry type!
-                        parse_line(value)
+                        self.parse_line(value)
                     elif ignore_unknown_types:
                         print("ignoring line:", line)
                         continue
                     else:
-                        raise RuntimeError('Bad line found:' + line) from error
+                        raise RuntimeError('Bad line found:' + line) 
 
         except:
             print("failed to load file")
             raise
                             
 
-        def parse_line(value):
-            ### at this point we can savely make some asumtions about the line passed
-            ### it is not a comment
-            ### it is a known type of entry
-            ### split() also ridded all double whitspaces and so on
 
-            if value[0] == GEOMETRIC_VERTICES:
-                if len(value) == 4:
-                    value.append(1.0)
-                if len(value) == 5:
-                    self.entrys[GEOMETRIC_VERTICES].append([float(v) for v in value[1]])
 
-            elif value[0] == TEXTURE_CORDIANTES:
-                if len(value) == 3:
-                    value.append(0.0) 
-                if len(value) == 4:
-                    self.entrys[TEXTURE_CORDIANTES].append([float(v) for v in value[1]])
-                    for parameter in self.entrys[TEXTURE_CORDIANTES][-1]:
-                        if 0 <= parameter <= 1:
-                            raise RuntimeError("bad value in line" + str(value)) from error
-
-            elif value[0] == POLYGONAL_FACE_ELEMENT:
-                if 1 > len(value) > 5:
-                    tmp = []
-                    for v in value[1:]
-                        if "/" in v:
-                            raise RuntimeError("/// not inplemented yet")
-                        if "." in v:
-                            raise RuntimeError("Float not allowed i POLYGONAL_FACE_ELEMENT, found '.' character.")
-
-                        tmp.append(int(v))
-                    self.entrys[POLYGONAL_FACE_ELEMENT].append(tmp)
-
-          else:
-              raise RuntimeError("Unhandled type TBD!")
-
+    def info(self):
+        return self.entrys
 
 
 if __name__ == "__main__":
