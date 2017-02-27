@@ -11,21 +11,23 @@ face = []
 verticies = []
 edge = []
 
-def draw_eq():
+def draw():
 
     obj_count = 7
+    pyramids = [ objects_3d.Pyramid() for _ in range(obj_count)]
 
-    pyramides = [ objects_3d.Pyramides() for _ in range(obj_count)]
     glBegin(GL_LINES)
 
+    for py in pyramids:
 
-    eq = [ objects_3d.Box() for _ in range(box_count)]
-    for box in eq:
-        box.resize(f_hight= random.random() * 4)
+        #box.resize(f_hight= random.random() * 4)
         #print(box.info())
-        for line in box.lines:
-            glVertex3fv(line[0])
-            glVertex3fv(line[1])
+
+        for pol in py.polygons():
+            py.info()
+            print("pol:",pol)
+            glVertex3fv(pol[0])
+            glVertex3fv(pol[1])
 
     glEnd()
 
@@ -54,10 +56,10 @@ def main():
                 quit()
 
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-        draw_eq()
+        draw()
 #        gen_lines()
 #        move()
-#        turn()
+        turn()
 #        scale()
         pygame.display.flip()
         pygame.time.wait(10)
